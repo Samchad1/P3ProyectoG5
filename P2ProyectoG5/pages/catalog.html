@@ -112,10 +112,14 @@
     }
 
     function donate(item) {
-      const nombre = prompt('¿Cuál es tu nombre?');
+      const nombreIngresado = prompt('¿Cuál es tu nombre?');
       const monto = prompt('¿Cuánto deseas donar?');
-      if (!nombre || !monto) return;
-      const entry = { nombre, organizacion: item.nombre, monto: parseFloat(monto) };
+      if (!monto) return;
+      const entry = {
+        nombre: nombreIngresado && nombreIngresado.trim() ? nombreIngresado.trim() : 'Anónima',
+        organizacion: item.nombre,
+        monto: parseFloat(monto)
+      };
       const donors = JSON.parse(localStorage.getItem('donors') || '[]');
       donors.push(entry);
       localStorage.setItem('donors', JSON.stringify(donors));
