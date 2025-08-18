@@ -14,12 +14,23 @@
         <div class="button-container">
           <button class="nav-button" onclick="location.href='../pages/home.html'">Inicio</button>
           <button class="nav-button" onclick="location.href='../pages/contact.html'">Contacto</button>
+          <button class="nav-button" onclick="location.href='../pages/admin.html'">Admin</button>
         </div>
       </nav>
     </div>
   </header>
 
   <main class="grid-container">
+    <section class="content-section">
+      <h2>Donaciones recientes</h2>
+      <table id="donor-table">
+        <thead>
+          <tr><th>Nombre</th><th>Sección</th><th>Organización</th><th>Monto</th><th>Fecha</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
     <section class="controls">
       <input type="text" id="search" placeholder="Buscar organización" />
       <select id="category-filter"></select>
@@ -37,28 +48,19 @@
     </section>
 
     <section class="content-section">
-      <h2>Donantes recientes</h2>
-      <table id="donor-table">
-        <thead>
-          <tr><th>Nombre</th><th>Organización</th><th>Monto</th></tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </section>
-
-    <section class="content-section">
       <h2>Retorno de inversión por anuncios</h2>
       <div class="info-box">
         <label for="revenue">Ingresos:</label>
-        <input id="revenue" type="number">
+        <input id="revenue" type="number" min="0">
         <label for="cost">Costos:</label>
-        <input id="cost" type="number">
-        <button class="cta-button" onclick="showROI()">Calcular ROI</button>
+        <input id="cost" type="number" min="0">
         <p id="roi-result"></p>
       </div>
     </section>
   </main>
 
+  <script src="../scripts/donations.js"></script>
+  <script src="../scripts/catalogManager.js"></script>
   <script>
     const catalogEl = document.getElementById('catalog');
     const loadingEl = document.getElementById('loading');
@@ -66,7 +68,8 @@
     const searchEl = document.getElementById('search');
     const filterEl = document.getElementById('category-filter');
     const sortEl = document.getElementById('sort');
-    const donorTableBody = document.querySelector('#donor-table tbody');
+    const revenueEl = document.getElementById('revenue');
+    const costEl = document.getElementById('cost');
 
     let catalogData = [];
 
@@ -74,7 +77,8 @@
       try {
         const res = await fetch('./data.json');
         if (!res.ok) throw new Error('Network');
-        catalogData = await res.json();
+        const base = await res.json();
+        catalogData = catalogManager.getMergedCatalog(base);
         renderFilters();
         renderCatalog();
       } catch (e) {
@@ -112,44 +116,49 @@
     }
 
     function donate(item) {
-      const nombre = prompt('¿Cuál es tu nombre?');
-      const monto = prompt('¿Cuánto deseas donar?');
-      if (!nombre || !monto) return;
-      const entry = { nombre, organizacion: item.nombre, monto: parseFloat(monto) };
-      const donors = JSON.parse(localStorage.getItem('donors') || '[]');
-      donors.push(entry);
-      localStorage.setItem('donors', JSON.stringify(donors));
-      renderDonors();
-    }
-
-    function renderDonors() {
-      donorTableBody.innerHTML = '';
-      const donors = JSON.parse(localStorage.getItem('donors') || '[]');
-      donors.forEach(d => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${d.nombre}</td><td>${d.organizacion}</td><td>$${d.monto.toFixed(2)}</td>`;
-        donorTableBody.appendChild(tr);
-      });
-      console.log('Donantes JSON:', JSON.stringify(donors));
+      const nombreIngresado = prompt('¿Cuál es tu nombre?');
+      if (!confirm(`Se donarán US$ ${item.precio} a ${item.nombre}. ¿Deseas continuar?`)) {
+        return;
+      }
+      const entry = {
+        nombre: nombreIngresado && nombreIngresado.trim() ? nombreIngresado.trim() : 'Anónima',
+        seccion: item.categoria,
+        organizacion: item.nombre,
+        monto: item.precio,
+        fecha: new Date().toISOString().split('T')[0]
+      };
+      addDonation(entry);
+      renderDonations();
     }
 
     function showROI() {
-      const revenue = parseFloat(document.getElementById('revenue').value);
-      const cost = parseFloat(document.getElementById('cost').value);
-      if (isNaN(revenue) || isNaN(cost) || cost === 0) {
-        document.getElementById('roi-result').textContent = 'Ingresa valores válidos';
+      const revenue = parseFloat(revenueEl.value);
+      const cost = parseFloat(costEl.value);
+      const resultEl = document.getElementById('roi-result');
+      if (isNaN(revenue) || isNaN(cost)) {
+        resultEl.textContent = '';
+        resultEl.style.color = '';
+        return;
+      }
+      if (cost <= 0 || revenue < 0) {
+        resultEl.textContent = 'Ingresa valores válidos';
+        resultEl.style.color = '';
         return;
       }
       const roi = ((revenue - cost) / cost) * 100;
-      document.getElementById('roi-result').textContent = `ROI: ${roi.toFixed(2)}%`;
+      const label = roi >= 0 ? 'Ganancia' : 'Pérdida';
+      resultEl.textContent = `ROI: ${roi.toFixed(2)}% (${label})`;
+      resultEl.style.color = roi >= 0 ? 'green' : 'red';
     }
 
+    revenueEl.addEventListener('input', showROI);
+    costEl.addEventListener('input', showROI);
     searchEl.addEventListener('keyup', renderCatalog);
     filterEl.addEventListener('change', renderCatalog);
     sortEl.addEventListener('change', renderCatalog);
 
     loadCatalog();
-    renderDonors();
+    renderDonations();
   </script>
 </body>
 </html>
