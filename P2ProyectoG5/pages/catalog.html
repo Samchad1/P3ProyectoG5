@@ -20,6 +20,16 @@
   </header>
 
   <main class="grid-container">
+    <section class="content-section">
+      <h2>Donaciones recientes</h2>
+      <table id="donor-table">
+        <thead>
+          <tr><th>Nombre</th><th>Sección</th><th>Organización</th><th>Monto</th><th>Fecha</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
     <section class="controls">
       <input type="text" id="search" placeholder="Buscar organización" />
       <select id="category-filter"></select>
@@ -37,28 +47,19 @@
     </section>
 
     <section class="content-section">
-      <h2>Donantes recientes</h2>
-      <table id="donor-table">
-        <thead>
-          <tr><th>Nombre</th><th>Organización</th><th>Monto</th></tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </section>
-
-    <section class="content-section">
       <h2>Retorno de inversión por anuncios</h2>
       <div class="info-box">
         <label for="revenue">Ingresos:</label>
-        <input id="revenue" type="number">
+        <input id="revenue" type="number" min="0">
         <label for="cost">Costos:</label>
-        <input id="cost" type="number">
+        <input id="cost" type="number" min="0">
         <button class="cta-button" onclick="showROI()">Calcular ROI</button>
         <p id="roi-result"></p>
       </div>
     </section>
   </main>
 
+  <script src="../scripts/donations.js"></script>
   <script>
     const catalogEl = document.getElementById('catalog');
     const loadingEl = document.getElementById('loading');
@@ -66,7 +67,6 @@
     const searchEl = document.getElementById('search');
     const filterEl = document.getElementById('category-filter');
     const sortEl = document.getElementById('sort');
-    const donorTableBody = document.querySelector('#donor-table tbody');
 
     let catalogData = [];
 
@@ -112,31 +112,29 @@
     }
 
     function donate(item) {
-      const nombre = prompt('¿Cuál es tu nombre?');
-      const monto = prompt('¿Cuánto deseas donar?');
-      if (!nombre || !monto) return;
-      const entry = { nombre, organizacion: item.nombre, monto: parseFloat(monto) };
-      const donors = JSON.parse(localStorage.getItem('donors') || '[]');
-      donors.push(entry);
-      localStorage.setItem('donors', JSON.stringify(donors));
-      renderDonors();
-    }
-
-    function renderDonors() {
-      donorTableBody.innerHTML = '';
-      const donors = JSON.parse(localStorage.getItem('donors') || '[]');
-      donors.forEach(d => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${d.nombre}</td><td>${d.organizacion}</td><td>$${d.monto.toFixed(2)}</td>`;
-        donorTableBody.appendChild(tr);
-      });
-      console.log('Donantes JSON:', JSON.stringify(donors));
+      const nombreIngresado = prompt('¿Cuál es tu nombre?');
+      const montoIngresado = prompt('¿Cuánto deseas donar?');
+      if (montoIngresado === null) return;
+      const monto = parseFloat(montoIngresado);
+      if (isNaN(monto) || monto <= 0) {
+        alert('Ingresa un monto válido');
+        return;
+      }
+      const entry = {
+        nombre: nombreIngresado && nombreIngresado.trim() ? nombreIngresado.trim() : 'Anónima',
+        seccion: item.categoria,
+        organizacion: item.nombre,
+        monto,
+        fecha: new Date().toISOString().split('T')[0]
+      };
+      addDonation(entry);
+      renderDonations();
     }
 
     function showROI() {
       const revenue = parseFloat(document.getElementById('revenue').value);
       const cost = parseFloat(document.getElementById('cost').value);
-      if (isNaN(revenue) || isNaN(cost) || cost === 0) {
+      if (isNaN(revenue) || isNaN(cost) || cost <= 0 || revenue < 0) {
         document.getElementById('roi-result').textContent = 'Ingresa valores válidos';
         return;
       }
@@ -149,7 +147,7 @@
     sortEl.addEventListener('change', renderCatalog);
 
     loadCatalog();
-    renderDonors();
+    renderDonations();
   </script>
 </body>
 </html>
