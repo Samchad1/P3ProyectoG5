@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Detalle de Organización</title>
+  <link rel="stylesheet" href="../styles/style.css">
+</head>
+<body class="fade-in">
+  <header class="header">
+    <div class="container">
+      <img src="../images/logo.png" alt="Logo de Pls Donate" class="logo">
+      <nav class="navigation">
+        <div class="button-container">
+          <button class="nav-button" onclick="location.href='../pages/catalog.html'">Volver al catálogo</button>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main class="grid-container">
+    <section class="content-section">
+      <div id="detail" class="info-box"></div>
+    </section>
+  </main>
+
+  <script>
+    const params = new URLSearchParams(location.search);
+    const id = parseInt(params.get('id'));
+    async function loadDetail() {
+      try {
+        const res = await fetch('./data.json');
+        const data = await res.json();
+        const item = data.find(i => i.id === id);
+        if (item) {
+          const d = document.getElementById('detail');
+          d.innerHTML = `<h1>${item.nombre}</h1><p>${item.descripcion}</p><p>Categoría: ${item.categoria}</p><p>Precio sugerido: US$ ${item.precio}</p>`;
+        }
+      } catch (e) {
+        document.getElementById('detail').textContent = 'No se pudo cargar la información';
+      }
+    }
+    loadDetail();
+  </script>
+</body>
+</html>

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Catálogo de Organizaciones</title>
+  <link rel="stylesheet" href="../styles/style.css">
+</head>
+<body class="catalog fade-in">
+  <header class="header">
+    <div class="container">
+      <img src="../images/logo.png" alt="Logo de Pls Donate" class="logo">
+      <nav class="navigation">
+        <div class="button-container">
+          <button class="nav-button" onclick="location.href='../pages/home.html'">Inicio</button>
+          <button class="nav-button" onclick="location.href='../pages/contact.html'">Contacto</button>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main class="grid-container">
+    <section class="controls">
+      <input type="text" id="search" placeholder="Buscar organización" />
+      <select id="category-filter"></select>
+      <select id="sort">
+        <option value="asc">Precio: menor a mayor</option>
+        <option value="desc">Precio: mayor a menor</option>
+      </select>
+    </section>
+
+    <section class="content-section">
+      <h1>Organizaciones sin fines de lucro</h1>
+      <div id="catalog" class="card-grid"></div>
+      <p id="loading" class="info-box">Cargando...</p>
+      <p id="error" class="info-box hidden">Error al cargar datos</p>
+    </section>
+
+    <section class="content-section">
+      <h2>Donantes recientes</h2>
+      <table id="donor-table">
+        <thead>
+          <tr><th>Nombre</th><th>Organización</th><th>Monto</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
+    <section class="content-section">
+      <h2>Retorno de inversión por anuncios</h2>
+      <div class="info-box">
+        <label for="revenue">Ingresos:</label>
+        <input id="revenue" type="number">
+        <label for="cost">Costos:</label>
+        <input id="cost" type="number">
+        <button class="cta-button" onclick="showROI()">Calcular ROI</button>
+        <p id="roi-result"></p>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const catalogEl = document.getElementById('catalog');
+    const loadingEl = document.getElementById('loading');
+    const errorEl = document.getElementById('error');
+    const searchEl = document.getElementById('search');
+    const filterEl = document.getElementById('category-filter');
+    const sortEl = document.getElementById('sort');
+    const donorTableBody = document.querySelector('#donor-table tbody');
+
+    let catalogData = [];
+
+    async function loadCatalog() {
+      try {
+        const res = await fetch('./data.json');
+        if (!res.ok) throw new Error('Network');
+        catalogData = await res.json();
+        renderFilters();
+        renderCatalog();
+      } catch (e) {
+        errorEl.classList.remove('hidden');
+      } finally {
+        loadingEl.classList.add('hidden');
+      }
+    }
+
+    function renderFilters() {
+      const categories = Array.from(new Set(catalogData.map(i => i.categoria)));
+      filterEl.innerHTML = '<option value="">Todas</option>' +
+        categories.map(c => `<option value="${c}">${c}</option>`).join('');
+    }
+
+    function renderCatalog() {
+      catalogEl.innerHTML = '';
+      let items = [...catalogData];
+      const search = searchEl.value.toLowerCase();
+      const category = filterEl.value;
+      if (search) items = items.filter(i => i.nombre.toLowerCase().includes(search));
+      if (category) items = items.filter(i => i.categoria === category);
+      items.sort((a,b) => sortEl.value === 'asc' ? a.precio - b.precio : b.precio - a.precio);
+      items.forEach(i => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `<img src="${i.imagen}" alt="${i.nombre}"><h3><a href="detail.html?id=${i.id}">${i.nombre}</a></h3><p>${i.descripcion}</p><p>US$ ${i.precio}</p>`;
+        const btn = document.createElement('button');
+        btn.className = 'cta-button';
+        btn.textContent = 'Donar';
+        btn.addEventListener('click', () => donate(i));
+        card.appendChild(btn);
+        catalogEl.appendChild(card);
+      });
+    }
+
+    function donate(item) {
+      const nombre = prompt('¿Cuál es tu nombre?');
+      const monto = prompt('¿Cuánto deseas donar?');
+      if (!nombre || !monto) return;
+      const entry = { nombre, organizacion: item.nombre, monto: parseFloat(monto) };
+      const donors = JSON.parse(localStorage.getItem('donors') || '[]');
+      donors.push(entry);
+      localStorage.setItem('donors', JSON.stringify(donors));
+      renderDonors();
+    }
+
+    function renderDonors() {
+      donorTableBody.innerHTML = '';
+      const donors = JSON.parse(localStorage.getItem('donors') || '[]');
+      donors.forEach(d => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${d.nombre}</td><td>${d.organizacion}</td><td>$${d.monto.toFixed(2)}</td>`;
+        donorTableBody.appendChild(tr);
+      });
+      console.log('Donantes JSON:', JSON.stringify(donors));
+    }
+
+    function showROI() {
+      const revenue = parseFloat(document.getElementById('revenue').value);
+      const cost = parseFloat(document.getElementById('cost').value);
+      if (isNaN(revenue) || isNaN(cost) || cost === 0) {
+        document.getElementById('roi-result').textContent = 'Ingresa valores válidos';
+        return;
+      }
+      const roi = ((revenue - cost) / cost) * 100;
+      document.getElementById('roi-result').textContent = `ROI: ${roi.toFixed(2)}%`;
+    }
+
+    searchEl.addEventListener('keyup', renderCatalog);
+    filterEl.addEventListener('change', renderCatalog);
+    sortEl.addEventListener('change', renderCatalog);
+
+    loadCatalog();
+    renderDonors();
+  </script>
+</body>
+</html>

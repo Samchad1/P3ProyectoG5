@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cargando...</title>
+  <link rel="stylesheet" href="styles/style.css" />
+</head>
+<body class="loader-page"> <!-- Aplica la clase 'loader-page' al cuerpo de la página, es para efectos visuales de la animación de carga -->
+  <div class="loader-container"> <!-- Contenedor de la animación de carga -->
+    <div class="loader-path"></div> <!-- Elemento representa el recorrido o la barra de progreso de la carga -->
+    <div class="path-loader"></div> <!-- Elemento adicional que completa la animación de carga -->
+  </div>
+  <script>
+    // Esto  redirige al usuario a la página 'home.html' después de esperar 3 segundos.
+    setTimeout(function () {
+      window.location.href = 'pages/home.html';  // Cambia la ubicación de la página actual a 'home.html' después de 3 segundos
+    }, 3000); // El 'setTimeout' espera 3000 milisegundos (3 segundos) antes de ejecutar la redirección
+  </script>
+</body>
+</html>
