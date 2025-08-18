@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Administrar Catálogo</title>
+  <link rel="stylesheet" href="../styles/style.css">
+</head>
+<body class="catalog fade-in">
+  <header class="header">
+    <div class="container">
+      <img src="../images/logo.png" alt="Logo de Pls Donate" class="logo">
+      <nav class="navigation">
+        <div class="button-container">
+          <button class="nav-button" onclick="location.href='../pages/catalog.html'">Catálogo</button>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main class="grid-container">
+    <section class="content-section">
+      <h1>Administración de Catálogo</h1>
+      <form id="add-form" class="info-box">
+        <input id="nombre" placeholder="Nombre" required>
+        <input id="categoria" placeholder="Categoría" required>
+        <input id="precio" type="number" min="0" placeholder="Precio" required>
+        <input id="descripcion" placeholder="Descripción" required>
+        <input id="imagen" placeholder="URL de imagen" required>
+        <button type="submit" class="cta-button">Agregar</button>
+      </form>
+      <h2>Organizaciones</h2>
+      <ul id="admin-list"></ul>
+    </section>
+  </main>
+
+  <script src="../scripts/catalogManager.js"></script>
+  <script>
+    const PASSWORD = 'admin123';
+    if (prompt('Contraseña de administrador') !== PASSWORD) {
+      alert('Acceso denegado');
+      location.href = './catalog.html';
+    }
+
+    const listEl = document.getElementById('admin-list');
+    const formEl = document.getElementById('add-form');
+    let baseData = [];
+
+    async function loadBase(){
+      try {
+        const res = await fetch('./data.json');
+        if(res.ok){
+          baseData = await res.json();
+        }
+      } catch(e){}
+      renderList();
+    }
+
+    function renderList(){
+      const items = catalogManager.getMergedCatalog(baseData);
+      listEl.innerHTML = '';
+      items.forEach(i => {
+        const li = document.createElement('li');
+        li.textContent = `${i.nombre} - ${i.categoria} - US$ ${i.precio}`;
+        const del = document.createElement('button');
+        del.textContent = 'Eliminar';
+        del.className = 'cta-button';
+        del.addEventListener('click', () => {
+          catalogManager.deleteCatalogItem(i.id);
+          renderList();
+        });
+        li.appendChild(del);
+        listEl.appendChild(li);
+      });
+    }
+
+    formEl.addEventListener('submit', e => {
+      e.preventDefault();
+      const nombre = document.getElementById('nombre').value.trim();
+      const categoria = document.getElementById('categoria').value.trim();
+      const precio = parseFloat(document.getElementById('precio').value);
+      const descripcion = document.getElementById('descripcion').value.trim();
+      const imagen = document.getElementById('imagen').value.trim();
+      if(!nombre || !categoria || !descripcion || !imagen || isNaN(precio) || precio <= 0){
+        alert('Completa todos los campos correctamente');
+        return;
+      }
+      catalogManager.addCatalogItem({id: Date.now(), nombre, categoria, precio, descripcion, imagen});
+      formEl.reset();
+      renderList();
+    });
+
+    loadBase();
+  </script>
+</body>
+</html>
