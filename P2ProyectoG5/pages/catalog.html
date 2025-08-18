@@ -37,16 +37,6 @@
     </section>
 
     <section class="content-section">
-      <h2>Donantes recientes</h2>
-      <table id="donor-table">
-        <thead>
-          <tr><th>Nombre</th><th>Organización</th><th>Monto</th></tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </section>
-
-    <section class="content-section">
       <h2>Retorno de inversión por anuncios</h2>
       <div class="info-box">
         <label for="revenue">Ingresos:</label>
@@ -66,7 +56,6 @@
     const searchEl = document.getElementById('search');
     const filterEl = document.getElementById('category-filter');
     const sortEl = document.getElementById('sort');
-    const donorTableBody = document.querySelector('#donor-table tbody');
 
     let catalogData = [];
 
@@ -85,7 +74,7 @@
     }
 
     function renderFilters() {
-      const categories = Array.from(new Set(catalogData.map(i => i.categoria)));
+      const categories = Array.from(new Set(catalogData.map(i => i.categoria))).sort();
       filterEl.innerHTML = '<option value="">Todas</option>' +
         categories.map(c => `<option value="${c}">${c}</option>`).join('');
     }
@@ -119,18 +108,7 @@
       const donors = JSON.parse(localStorage.getItem('donors') || '[]');
       donors.push(entry);
       localStorage.setItem('donors', JSON.stringify(donors));
-      renderDonors();
-    }
-
-    function renderDonors() {
-      donorTableBody.innerHTML = '';
-      const donors = JSON.parse(localStorage.getItem('donors') || '[]');
-      donors.forEach(d => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${d.nombre}</td><td>${d.organizacion}</td><td>$${d.monto.toFixed(2)}</td>`;
-        donorTableBody.appendChild(tr);
-      });
-      console.log('Donantes JSON:', JSON.stringify(donors));
+      alert('¡Gracias por tu donación!');
     }
 
     function showROI() {
@@ -149,7 +127,6 @@
     sortEl.addEventListener('change', renderCatalog);
 
     loadCatalog();
-    renderDonors();
   </script>
 </body>
 </html>
