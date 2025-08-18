@@ -53,7 +53,6 @@
         <input id="revenue" type="number">
         <label for="cost">Costos:</label>
         <input id="cost" type="number">
-        <button class="cta-button" onclick="showROI()">Calcular ROI</button>
         <p id="roi-result"></p>
       </div>
     </section>
@@ -67,6 +66,8 @@
     const filterEl = document.getElementById('category-filter');
     const sortEl = document.getElementById('sort');
     const donorTableBody = document.querySelector('#donor-table tbody');
+    const revenueEl = document.getElementById('revenue');
+    const costEl = document.getElementById('cost');
 
     let catalogData = [];
 
@@ -147,6 +148,8 @@
     searchEl.addEventListener('keyup', renderCatalog);
     filterEl.addEventListener('change', renderCatalog);
     sortEl.addEventListener('change', renderCatalog);
+    revenueEl.addEventListener('input', showROI);
+    costEl.addEventListener('input', showROI);
 
     loadCatalog();
     renderDonors();
