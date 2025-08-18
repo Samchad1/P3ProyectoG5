@@ -52,7 +52,7 @@
 
     <section id="C3" class="area-c3">
       <h2>Formulario de Donación</h2>
-      <form class="donation-form" onsubmit="alert('¡Gracias por tu donación! Nos pondremos en contacto contigo pronto.'); return false;">
+      <form class="donation-form">
         <div class="form-group">
           <label for="nombre">Nombre completo</label>
           <input type="text" id="nombre" name="nombre" placeholder="Ingresa tu nombre completo" required />
@@ -92,5 +92,19 @@
       </form>
     </section>
   </div>
+  <script src="../scripts/donations.js"></script>
+  <script>
+      document.querySelector('.donation-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const nombre = document.getElementById('nombre').value.trim() || 'Anónima';
+        const monto = parseFloat(document.getElementById('monto').value);
+        const fecha = document.getElementById('fecha').value;
+        if (isNaN(monto)) return;
+        addDonation({ nombre, seccion: 'Causas Sociales', organizacion: '', monto, fecha });
+        renderDonations();
+        alert('¡Gracias por tu donación! Nos pondremos en contacto contigo pronto.');
+        this.reset();
+      });
+  </script>
 </body>
 </html>
