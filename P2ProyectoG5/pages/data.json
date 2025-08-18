@@ -1,12 +1,5 @@
 [
-  {"id":1,"nombre":"Fundación Vida","categoria":"Salud","precio":50,"descripcion":"Apoyo a tratamientos médicos","imagen":"../images/salud.jpeg"},
-  {"id":2,"nombre":"Manos Solidarias","categoria":"Social","precio":30,"descripcion":"Alimentos para comunidades","imagen":"../images/dona.jpg"},
-  {"id":3,"nombre":"Protege Huellas","categoria":"Animal","precio":40,"descripcion":"Rescate de animales callejeros","imagen":"../images/dona1.jpg"},
-  {"id":4,"nombre":"Cura Infantil","categoria":"Salud","precio":60,"descripcion":"Medicinas para niños","imagen":"../images/dona3.jpg"},
-  {"id":5,"nombre":"Comunidad Verde","categoria":"Social","precio":20,"descripcion":"Reforestación urbana","imagen":"../images/dona.jpg"},
-  {"id":6,"nombre":"Hogar Calido","categoria":"Social","precio":35,"descripcion":"Refugio para personas sin hogar","imagen":"../images/dona1.jpg"},
-  {"id":7,"nombre":"Vida Marina","categoria":"Animal","precio":45,"descripcion":"Protección de fauna marina","imagen":"../images/dona3.jpg"},
-  {"id":8,"nombre":"Sonrisas","categoria":"Salud","precio":25,"descripcion":"Dentista para todos","imagen":"../images/dona.jpg"},
-  {"id":9,"nombre":"Escuela Futuro","categoria":"Social","precio":55,"descripcion":"Educación para jóvenes","imagen":"../images/dona1.jpg"},
-  {"id":10,"nombre":"Amigos Peludos","categoria":"Animal","precio":50,"descripcion":"Albergue de animales","imagen":"../images/dona3.jpg"}
+  {"id":1, "nombre":"Manos Solidarias", "categoria":"Social", "precio":30, "descripcion":"Alimentos para comunidades", "imagen":"../images/manos_solidarias.jpg"},
+  {"id":2, "nombre":"Comunidad Verde", "categoria":"Social", "precio":20, "descripcion":"Reforestación urbana", "imagen":"../images/comunidadVerde.jpg"},
+  {"id":3, "nombre":"Hogar Calido", "categoria":"Social", "precio":35, "descripcion":"Refugio para personas sin hogar", "imagen":"../images/hogarCalido.jpg"}
 ]
